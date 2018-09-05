@@ -1,25 +1,171 @@
+
 <!DOCTYPE html>
 <html class="no-js" lang="da">
 <head>
     <meta charset="utf-8">
-    <title>Bahushka</title>
-    <style>
+    <title>Bistro Babushka</title>
+<style>
+     body{
+            background-color:#DE0400;
+        }
+     article{
+            padding: 1em;
+            background-color:#FF8C00;
+            text-align: center;
+            line-height: 22px;
+        }
+        .data-container article img{
+            width: 100%;
+        }
+        .data-container{
+            margin: 0 auto;
+            display:grid;
+        }
+       @media screen and (min-width:580px){
+            .data-container{
+                padding-left:10%;
+                padding-right:10%;
+                grid-gap: 5px;
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    #modal {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            background-color: rgba(0, 0, 0, .7);
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.6s;
+
+        }
+
+        #modal-content {
+            width: 70vw;
+            height: 70vh;
+            background-color: #FF8C00;
+            margin: auto;
+            line-height: 25px;
+    }
+
+        #modal.vis {
+            opacity: 1;
+            pointer-events: all;
+            transition: 0.6s;
+        }
+        #modal img{
+            width: 80%;
+            object-fit: scale-down;
+        }
+    h1{
+        font-size: 50px;
+        text-align: center;
+    }
+    nav{
+        text-align: center;
+    }
 </style>
     </head>
 <body>
+
+    <section id=modal>
+        <button>Close</button>
+        <div id=modal-content>
+            <h2 class="modal-navn"></h2>
+            <img class="modal-billede" src="" alt=""><br>
+            <span class="modal-langbeskrivelse"></span><br>
+            <span class="modal-oprindelsesregion"></span><br>
+           Pris: <span class="modal-pris"></span>
+        </div>
+    </section>
+
 <header>
-   <main class="contaioner">
+       <h1>Bistro Babushka</h1>
         <nav>
-            <button>Alle</button>
-            <button>Forretter</button>
-            <button>Hovedretter</button>
-            <button>Desserter</button>
-            <button>Drikkevarer</button>
+            <button class="menu-item" kategori="Alle">Alle</button>
+            <button class="menu-item" kategori="forretter">Forretter</button>
+            <button class="menu-item" kategori="hovedretter">Hovedretter</button>
+            <button class="menu-item" kategori="desserter">Desserter</button>
+            <button class="menu-item" kategori="drikkevarer">Drikkevarer</button>
         </nav>
-        <h2></h2>
-    </main>
 </header>
-<script>
+
+    <main class="container">
+        <section class="data-container"></section>
+    </main>
+    <template class="data-template">
+      <article class="ret">
+          <img src="" alt=""><br>
+          <h2></h2>
+          <span class="kategori"></span>
+           <span class="kortbeskrivelse"></span><br>
+           Pris: <span class="pris"></span>
+      </article>
+   </template>
+
+    <script>
+        let kategoriFilter = "Alle";
+        let dest = document.querySelector(".data-container");
+        let modal= document.querySelector("#modal");
+        document.addEventListener("DOMContentLoaded", hentJson);
+
+        async function hentJson(){
+            let myJson = await fetch("menu.json");
+            retter = await myJson.json();
+            visRetter();
+        }
+
+        document.querySelectorAll(".menu-item").forEach(knap => {
+            knap.addEventListener("click", filtering)
+
+        });
+
+        function filtering() {
+            dest.textContent = ""
+            kategoriFilter = this.getAttribute("kategori")
+            visRetter();
+
+        };
+
+
+
+
+        function visRetter(){
+            let dest = document.querySelector(".data-container");
+            let temp = document.querySelector(".data-template");
+            retter.forEach(ret=>{
+
+                if (ret.kategori == kategoriFilter || kategoriFilter == "Alle") {
+
+                let klon = temp.cloneNode(true).content;
+                klon.querySelector("h2").textContent = ret.navn;
+                klon.querySelector(".kategori").textContent = ret.kategori;
+                klon.querySelector(".kortbeskrivelse").textContent = ret.kortbeskrivelse;
+                klon.querySelector(".pris").textContent = ret.pris;
+                klon.querySelector("img").src = ret.billede;
+                klon.querySelector("img").addEventListener("click", () =>  {
+                    visModal(ret);
+                });
+                dest.appendChild(klon);
+                }
+            })};
+
+        function visModal(retteren) {
+
+            modal.classList.add("vis");
+            modal.querySelector(".modal-navn").textContent = retteren.navn;
+            modal.querySelector(".modal-billede").src = retteren.billede;
+            modal.querySelector(".modal-billede").alt = "Foto af"+ retteren.navn;
+            modal.querySelector(".modal-langbeskrivelse").textContent = retteren.langbeskrivelse;
+            modal.querySelector(".modal-oprindelsesregion").textContent = retteren.oprindelsesregion;
+            modal.querySelector(".modal-pris").textContent = retteren.pris;
+            document.querySelector("#modal button").addEventListener("click", skjulModal);
+        }
+        function skjulModal(){
+            modal.classList.remove("vis");
+        }
+
     </script>
     </body>
 
